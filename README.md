@@ -1,8 +1,8 @@
-# NYS COVID19 Disparities Survey
+# COVID19 Survey, June 2020
 
-This is a repository for the NYS COVID19 Disparities Survey. The following is the information of the survey.
-* Time Period: Nov. 23. 2020 - Dec. 6. 2020.
-* Sample Size: 1,309.
+This is a repository for the COVID19 Survey conducted in June 2020. The following is the information of the survey.
+* Time Period: Jun. 3. 2020 - Jun. 8. 2020.
+* Sample Size: 1,211.
 * Method: Qualtrics Online survey.
 
 ## File Descriptions
