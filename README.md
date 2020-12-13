@@ -1,28 +1,33 @@
-# COVID19 Survey, June 2020
+Study Title: How is COVID-19 Associated Job-loss affecting Support for Medicare for All?
+Authors: Yongjin Choi and Ashley M. Fox
 
-This is a repository of the COVID19 Survey conducted in June 2020. The following is the information of the survey.
-* Time Period: Jun. 3. 2020 - Jun. 8. 2020.
-* Sample Information:
-	* Size: 1,211
-	* Ages 18 or higher
-	* Area: US
+# COVID-19 Survey, June 2020
+
+This is a repository of the COVID-19 Survey conducted in June 2020. The following is the information of the survey.
+
+* Time Period: Nov. 23. 2020 - Dec. 8. 2020.
+* Sample Information
+  * Size: 1,353 (based on Dec-11th version).
+  * Ages 18 or higher
+  * Area: New York State
 * Method: Qualtrics Online survey.
 
 ## File Descriptions
 
-* NYS+Coronavirus+Disparities+Study_December+7,+2020_14.25: Survey data with text values (Original file from Elizabeth from Qualtrics).
-* NYS_COVID19_Disparities: This dta file is based on a numeric version directly downloaded from Qualtrics on Dec. 9. 2020.
-* NYS_COVID19_Survey.ipynb: Analysis results
+### Data
 
-## Data Review
+* **A+Survey+on+Health+Care+Access_June+9,+2020_13.57.csv**: The original version received from Qualtrics.
+* **COVID19Survey_20200613text_Ver1.0.csv**: Yongjin's version (Downloaded on Jun. 13th. 2020)
 
-* Go to [Table Summary](https://livealbany-my.sharepoint.com/:u:/g/personal/ychoi2_albany_edu/EV7CMXsnyJtNqwlLl4siTgYB9ExShwbjen0LlrZP5mVELA?e=O46DuG)
+### Project Folders
 
-![](/img/summary.JPG)
-
-* Go to [Data Review by Race](https://livealbany-my.sharepoint.com/:u:/g/personal/ychoi2_albany_edu/Ec6QbZ0LHfpOppNh5RgKXPkBnhP7fg1tS8psWer1fdvKWw?e=m0FHME)
-
+* **01. M4A Study**: How is COVID-19 Associated Job-loss affecting Support for Medicare for All?
+	* Contributors: Ashley M. Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke
+* **02. Media Polarization**: Ashley's analysis
+	* Contributors: Yongjin Choi and Ashley M. Fox
+	
 ## Contributors
+
 Principal Investigator: [Ashley Fox](https://twitter.com/ashfoxly)
 
-Author: [Yongjin Choi](https://twitter.com/TheYongjinChoi)
+Author: [@Yongjin Choi](https://twitter.com/TheYongjinChoi)
