@@ -1,23 +1,22 @@
 # Study Title: How is COVID-19 Associated Job-loss affecting Support for Medicare for All?
 
-This is a repository for the NYS COVID19 Disparities Survey. The following is the information of the survey.
-* Time Period: Nov. 23. 2020 - Dec. 6. 2020.
-* Sample Size: 1,309.
-* Method: Qualtrics Online survey.
+*Authors: Ashley M Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke*
 
 ## File Descriptions
 
-* NYS+Coronavirus+Disparities+Study_December+7,+2020_14.25: Survey data with text values (Original file from Elizabeth from Qualtrics).
-* NYS_COVID19_Disparities: This dta file is based on a numeric version directly downloaded from Qualtrics on Dec. 9. 2020.
-* NYS_COVID19_Survey.ipynb: Analysis results
+### Data
 
-## Data Review
+* COVID_Survey Data_analysis_Qualtrics_sample_only: A cleaned dta file
+* M4A_Study Instruments_Codebook.docx: Study questionnaires
 
-* Go to [Table Summary](https://livealbany-my.sharepoint.com/:u:/g/personal/ychoi2_albany_edu/EV7CMXsnyJtNqwlLl4siTgYB9ExShwbjen0LlrZP5mVELA?e=O46DuG)
+### Scripts
 
-![](/img/summary.JPG)
+* Kevin do file 101420.do: Kevin's analysis
+* M4A_Analysis_9_7_2020.do: Ashley's analysis
+* Yongjin_Margins.md: Yongjin's analysis (margins plots). Click this to see the results on Github/
+* Yongjin_Margins.ipynb: Original notebook document of Yongjin's analysis
+* Yongjin_Margins.do: STATA do-file version of Yongjin's analysis
 
-* Go to [Data Review by Race](https://livealbany-my.sharepoint.com/:u:/g/personal/ychoi2_albany_edu/Ec6QbZ0LHfpOppNh5RgKXPkBnhP7fg1tS8psWer1fdvKWw?e=m0FHME)
 
 ## Contributors
 Principal Investigator: [Ashley Fox](https://twitter.com/ashfoxly)
