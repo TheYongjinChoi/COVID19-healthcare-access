@@ -1,8 +1,11 @@
 # COVID19 Survey, June 2020
 
-This is a repository for the COVID19 Survey conducted in June 2020. The following is the information of the survey.
+This is a repository of the COVID19 Survey conducted in June 2020. The following is the information of the survey.
 * Time Period: Jun. 3. 2020 - Jun. 8. 2020.
-* Sample Size: 1,211.
+* Sample Information:
+	* Size: 1,211
+	* Ages 18 or higher
+	* Area: US
 * Method: Qualtrics Online survey.
 
 ## File Descriptions
