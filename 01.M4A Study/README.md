@@ -1,4 +1,4 @@
-# NYS COVID19 Disparities Survey
+# Study Title: How is COVID-19 Associated Job-loss affecting Support for Medicare for All?
 
 This is a repository for the NYS COVID19 Disparities Survey. The following is the information of the survey.
 * Time Period: Nov. 23. 2020 - Dec. 6. 2020.
