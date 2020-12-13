@@ -16,9 +16,3 @@
 * Yongjin_Margins.md: Yongjin's analysis (margins plots). Click this to see the results on Github/
 * Yongjin_Margins.ipynb: Original notebook document of Yongjin's analysis
 * Yongjin_Margins.do: STATA do-file version of Yongjin's analysis
-
-
-## Contributors
-Principal Investigator: [Ashley Fox](https://twitter.com/ashfoxly)
-
-Author: [@Yongjin Choi](https://twitter.com/TheYongjinChoi)
