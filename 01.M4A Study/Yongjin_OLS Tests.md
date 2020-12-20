@@ -431,7 +431,7 @@ esttab lm1 mfx1 lm2 mfx2 lm3 mfx3/*
     (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table4_OLS.png written in PNG format)
     
     
-    Table 5. OLS Models, Any Treatment with Interactions (Party ID/Job and Insurance Loss)
+    Table 4. OLS Models with Separate Treatments
     --------------------------------------------------------------------------------------------------------------------------------------
                                 Party ID                        Insurance Loss                              Job Loss                      
                             Coefficients            Margins       Coefficients            Margins       Coefficients            Margins   
