@@ -1,6 +1,6 @@
 # How is COVID-19 Associated Job-loss affecting Support for Medicare for All?
 
-*Paper Authors: Ashley M Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke </br> Script Author: Yongjin Choi* </br> *Last updated: Dec. 13. 2020*
+*Paper Authors: Ashley M Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke </br> Script Author: Yongjin Choi* </br> *Last updated: Dec. 20. 2020*
 
 * What's Included
     * [Part I. Basic Setting](#part-i-basic-setting)
