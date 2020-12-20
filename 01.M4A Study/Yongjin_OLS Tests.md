@@ -10,7 +10,7 @@
       - [Table 2](#table-2)
       - [Table 3](#table-3)
       - [Table 4. Ashley's Original Version](#table-4-ashleys-original-version)
-      - [Table 4. OLS](#table-4.-ols)
+      - [Table 4. OLS](#table-4-ols)
       - [Table 5. Ashley's Original Version](#table-5-ashleys-original-version)
       - [Table 5. OLS](#table-5-ols)
       - [Table 5. OLS with Party ID Interactions with Insurance and Job Losses](#table-5-ols-with-party-id-interactions-with-insurance-and-job-losses)
