@@ -43,13 +43,14 @@ grstyle color background white
 
 // Image Repository
 global myimg "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img"
-global esttab_opts nonumbers label nobaselevels interaction(" X ") compress star(* 0.1 ** 0.05 *** 0.01) //addnote("note")
+global esttab_opts nonumbers label interaction(" X ") compress star(* 0.1 ** 0.05 *** 0.01) //addnote("note")
 ```
 
     
     delimiter now cr
     
-    C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL
+    C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Fr
+    > aming Single-Payer\06.Submission\JHPPL
     
     
     
@@ -405,7 +406,7 @@ graph export "$myimg\Table4_OLS.png", replace
 esttab lm1 mfx1 lm2 mfx2 lm3 mfx3/*
     //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
     */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
-    */title(Table 5. OLS Models, Any Treatment with Interactions (Party ID/Job and Insurance Loss))/*
+    */title(Table 4. OLS Models))/*
     */mgroups("Party ID" "Insurance Loss" "Job Loss", pattern(1 0 1 0 1 0))/*
     */mtitles("Coefficients" "Margins" "Coefficients" "Margins" "Coefficients" "Margins")/*
     */order(*.treatment *.pid *._at#*.pid *.lost_insurance_dummy *._at#*.lost_insurance_dummy *.lost_job *._at#*.lost_job)/*
@@ -1101,6 +1102,357 @@ esttab lm1 mfx1 lm2 mfx2/*
     Adjusted R-squared                 0.1215                                                                0.1053                                                      
     F                                  8.9690                                                                7.7841                                                      
     ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+### Coefficient Plots
+
+#### Party ID Interaction
+
+![](img\CoefPlot_PID_edited.png)
+
+
+```stata
+eststo clear
+local x pid
+local title0 "Effects of the Treatments on the Support for M4A: With the Party ID Interaction"
+local title1 "(a) Separate Treatments"
+local title2 "(b) Any Treatments"
+
+local coeflabels1 1.treatment = `""Airbnb" "Arm""' 2.treatment = `""COVID" "Arm""' 1.treatment#*.`x' = `""Airbnb" "Arm""' 2.treatment#*.`x' = `""COVID" "Arm""' 0.treatment = `""No" "Arms""' *.`x' = `""No" "Arms""'
+local coeflabels2 1.any_treat = `""Any" "Arms""' 1.any_treat#1.`x' = `""Any" "Arms""' 1.any_treat#2.`x' = `""Any" "Arms""' 0.any_treat = `""No" "Arms""' *.`x' = `""No" "Arms""'
+
+local num = 1
+eststo lm`num': qui reg support_M4A_dummy i.treatment##i.`x' female i.age_cat i.race_cat i.income_cat
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.treatment))/*
+               */(., keep(1.`x' *.treatment#1.`x'))/*
+               */(., keep(2.`x' *.treatment#2.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels1', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.treatment = "{bf:Dem}" *.treatment#1.`x' 1.`x' = "{bf:Rep}" *.treatment#2.`x' 2.`x' = "{bf:Ind}")/*
+        */note(" " "* p<0.1, ** p<0.0.5, *** p<0.01") /*
+        */name(g`num', replace)
+    local num = `num' + 1
+
+eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.`x' female i.age_cat i.race_cat i.income_cat
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.any_treat))/*
+               */(., keep(1.`x' *.any_treat#1.`x'))/*
+               */(., keep(2.`x' *.any_treat#2.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) baselevels /*
+        */coeflabels(`coeflabels2', notick labgap(2)) plotregion(margin(b=0))/*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.any_treat = "{bf:Dem}" *.any_treat#1.`x' 1.`x' = "{bf:Rep}" *.any_treat#2.`x' 2.`x' = "{bf:Ind}")/*
+        */note(" " " ")/*
+        */name(g`num', replace)    
+    local num = `num' + 1
+
+qui graph combine g1 g2, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Point Estimates")/*
+    */ycommon xsize(11) ysize(5)
+graph save "$myimg\CoefPlot_PID.gph", replace
+graph export "$myimg\CoefPlot_PID.png", replace
+
+esttab lm1 lm2 /*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table. Effects of the Treatments on the Support for M4A: With the Party ID Interaction)/*
+    */mtitles("Separate" "Any")/*
+    */varwidth(25) modelwidth(20) nobaselevel /*
+    */wide $esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_PID.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_PID.png written in PNG format)
+    
+    
+    Table. Effects of the Treatments on the Support for M4A: With the Party ID Interaction
+    -------------------------------------------------------------------------------------------------------------------
+                                          Separate                                          Any                        
+    -------------------------------------------------------------------------------------------------------------------
+    Airbnb Arm                              0.0686        [-0.0252,0.1625]                                             
+    COVID-19 Arm                            0.0960**       [0.0005,0.1914]                                             
+    Rep                                    -0.1198**     [-0.2173,-0.0222]              -0.1200**     [-0.2174,-0.0225]
+    Ind                                    -0.1321**     [-0.2404,-0.0239]              -0.1322**     [-0.2403,-0.0240]
+    Airbnb Arm X Rep                       -0.0544        [-0.1939,0.0851]                                             
+    Airbnb Arm X Ind                       -0.0139        [-0.1723,0.1446]                                             
+    COVID-19 Arm X Rep                     -0.0657        [-0.2061,0.0746]                                             
+    COVID-19 Arm X Ind                     -0.0705        [-0.2306,0.0896]                                             
+    Female                                 -0.1057***    [-0.1599,-0.0516]              -0.1056***    [-0.1596,-0.0515]
+    25-44                                   0.0462        [-0.0320,0.1244]               0.0458        [-0.0323,0.1239]
+    45-64                                  -0.0339        [-0.1243,0.0565]              -0.0331        [-0.1233,0.0571]
+    65+                                    -0.2235***    [-0.3279,-0.1192]              -0.2232***    [-0.3273,-0.1190]
+    Hispanic                               -0.0471        [-0.1557,0.0615]              -0.0481        [-0.1565,0.0604]
+    black                                  -0.0651        [-0.1466,0.0165]              -0.0656        [-0.1470,0.0159]
+    other                                  -0.0433        [-0.1383,0.0517]              -0.0432        [-0.1380,0.0517]
+    $20,000-$74,999                        -0.0490        [-0.1188,0.0207]              -0.0492        [-0.1188,0.0205]
+    $75,000-$149,000                        0.0248        [-0.0589,0.1085]               0.0249        [-0.0586,0.1085]
+    $150,000+                               0.0928**       [0.0093,0.1764]               0.0943**       [0.0109,0.1777]
+    Any Treatments=1                                                                     0.0818**       [0.0008,0.1628]
+    Any Treatments=1 X Rep                                                              -0.0596        [-0.1799,0.0606]
+    Any Treatments=1 X Ind                                                              -0.0416        [-0.1770,0.0938]
+    Constant                                0.7837***      [0.6710,0.8965]               0.7836***      [0.6710,0.8962]
+    -------------------------------------------------------------------------------------------------------------------
+    Observations                              1211                                         1211                        
+    R-squared                               0.1159                                       0.1155                        
+    Adjusted R-squared                      0.1026                                       0.1044                        
+    F                                       8.6818                                      10.4011                        
+    -------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+#### Insurance Loss Interaction
+
+![](img\CoefPlot_Insu_edited.png)
+
+
+```stata
+eststo clear
+local x lost_insurance_dummy
+local title0 "Effects of the Treatments on the Support for M4A: With the Insurance Loss Interaction"
+local title1 "(a) Separate Treatments"
+local title2 "(b) Any Treatments"
+
+local coeflabels1 1.treatment = `""Airbnb" "Arm""' 2.treatment = `""COVID-19" "Arm""' 1.treatment#*.`x' = `""Airbnb" "Arm""' 2.treatment#*.`x' = `""COVID-19" "Arm""' 1.`x' = `""No" "Arms""' 0.treatment = `""No" "Arms""'
+local coeflabels2 1.any_treat = `""Any" "Arms""' 1.any_treat#1.`x' = `""Any" "Arms""' 1.`x' = `""No" "Arms""' 0.any_treat = `""No" "Arms""'
+
+local num = 1
+eststo lm`num': qui reg support_M4A_dummy i.treatment##i.`x' female i.age_cat i.race_cat i.income_cat
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.treatment))/*
+               */(., keep(1.`x' *.treatment#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels1', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor)) /*
+        */groups(*.treatment = "{bf:No Insurance Loss}" *.treatment#1.`x' 1.`x' = "{bf:Insurance Loss}")/*
+        */note(" " "* p<0.1, ** p<0.0.5, *** p<0.01") /*
+        */name(g`num', replace)
+    local num = `num' + 1
+
+eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.`x' female i.age_cat i.race_cat i.income_cat
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.any_treat))/*
+               */(., keep(1.`x' *.any_treat#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels2', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(2) mlabcolor(black)) ylab(, ang(hor)) /*
+        */groups(*.any_treat = "{bf:No Insurance Loss}" *.any_treat#1.`x' 1.`x' = "{bf:Insurance Loss}")/*
+        */note(" " " ") /*
+        */name(g`num', replace)    
+    local num = `num' + 1
+
+qui graph combine g1 g2, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Point Estimates")/*
+    */ycommon xsize(10) ysize(5)
+graph save "$myimg\CoefPlot_Insu.gph", replace
+graph export "$myimg\CoefPlot_Insu.png", replace
+
+esttab lm1 lm2 /*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table. Effects of the Treatments on the Support for M4A: With the Insurance Loss Interaction)/*
+    */mtitles("Separate" "Any")/*
+    */varwidth(25) modelwidth(20) nobaselevel /*
+    */wide $esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Insu.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Insu.png written in PNG format)
+    
+    
+    Table. Effects of the Treatments on the Support for M4A: With the Insurance Loss Interaction
+    -------------------------------------------------------------------------------------------------------------------
+                                          Separate                                          Any                        
+    -------------------------------------------------------------------------------------------------------------------
+    Airbnb Arm                              0.0692        [-0.0151,0.1535]                                             
+    COVID-19 Arm                            0.0530        [-0.0308,0.1368]                                             
+    Lost Insurance                          0.0917**       [0.0042,0.1792]               0.0921**       [0.0046,0.1796]
+    Airbnb Arm X Lost Insur~e              -0.0468        [-0.1703,0.0767]                                             
+    COVID-19 Arm X Lost Ins~e               0.0158        [-0.1095,0.1410]                                             
+    Female                                 -0.0844***    [-0.1399,-0.0290]              -0.0839***    [-0.1393,-0.0285]
+    25-44                                   0.0615        [-0.0174,0.1404]               0.0627        [-0.0162,0.1415]
+    45-64                                   0.0087        [-0.0843,0.1017]               0.0096        [-0.0833,0.1025]
+    65+                                    -0.1779***    [-0.2858,-0.0701]              -0.1761***    [-0.2838,-0.0684]
+    Hispanic                               -0.0084        [-0.1171,0.1004]              -0.0100        [-0.1186,0.0987]
+    black                                  -0.0264        [-0.1075,0.0547]              -0.0253        [-0.1063,0.0557]
+    other                                  -0.0607        [-0.1561,0.0347]              -0.0628        [-0.1581,0.0324]
+    $20,000-$74,999                        -0.0458        [-0.1162,0.0246]              -0.0461        [-0.1164,0.0243]
+    $75,000-$149,000                        0.0335        [-0.0505,0.1175]               0.0351        [-0.0488,0.1190]
+    $150,000+                               0.0975**       [0.0137,0.1814]               0.0974**       [0.0136,0.1812]
+    Any Treatments=1                                                                     0.0610*       [-0.0116,0.1336]
+    Any Treatments=1 X Lost~c                                                           -0.0167        [-0.1230,0.0896]
+    Constant                                0.6251***      [0.5123,0.7379]               0.6236***      [0.5109,0.7363]
+    -------------------------------------------------------------------------------------------------------------------
+    Observations                              1211                                         1211                        
+    R-squared                               0.0954                                       0.0946                        
+    Adjusted R-squared                      0.0840                                       0.0848                        
+    F                                       8.3992                                       9.6209                        
+    -------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+#### Job Loss Interaction
+
+![](img\CoefPlot_Job_edited.png)
+
+
+```stata
+eststo clear
+local x lost_job
+local title0 "Effects of the Treatments on the Support for M4A: With the Job Loss Interaction"
+local title1 "(a) Separate Treatments"
+local title2 "(b) Any Treatments"
+
+local coeflabels1 1.treatment = `""Airbnb" "Arm""' 2.treatment = `""COVID-19" "Arm""' 1.treatment#*.`x' = `""Airbnb" "Arm""' 2.treatment#*.`x' = `""COVID-19" "Arm""' 1.`x' = `""No" "Arms""' 0.treatment = `""No" "Arms""'
+local coeflabels2 1.any_treat = `""Any" "Arms""' 1.any_treat#1.`x' = `""Any" "Arms""' 1.`x' = `""No" "Arms""' 0.any_treat = `""No" "Arms""'
+
+local num = 1
+eststo lm`num': qui reg support_M4A_dummy i.treatment##i.`x' female i.age_cat i.race_cat i.income_cat
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.treatment))/*
+               */(., keep(1.`x' *.treatment#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels1', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.treatment = "{bf:No Job Loss}" *.treatment#1.`x' 1.`x' = "{bf:Job Loss}")/*
+        */note(" " "* p<0.1, ** p<0.0.5, *** p<0.01") /*
+        */name(g`num', replace)
+    local num = `num' + 1
+
+eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.`x' female i.age_cat i.race_cat i.income_cat
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.any_treat))/*
+               */(., keep(1.`x' *.any_treat#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels2', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(2) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.any_treat = "{bf:No Job Loss}" *.any_treat#1.`x' 1.`x' = "{bf:Job Loss}")/*
+        */note(" " " ") /*
+        */name(g`num', replace)    
+    local num = `num' + 1
+
+qui graph combine g1 g2, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Point Estimates")/*
+    */ycommon xsize(10) ysize(5)
+
+graph save "$myimg\CoefPlot_Job.gph", replace
+graph export "$myimg\CoefPlot_Job.png", replace
+
+esttab lm1 lm2 /*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table. Effects of the Treatments on the Support for M4A: With the Job Loss Interaction)/*
+    */mtitles("Separate" "Any")/*
+    */varwidth(25) modelwidth(20) nobaselevel /*
+    */wide $esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Job.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Job.png written in PNG format)
+    
+    
+    Table. Effects of the Treatments on the Support for M4A: With the Job Loss Interaction
+    -------------------------------------------------------------------------------------------------------------------
+                                          Separate                                          Any                        
+    -------------------------------------------------------------------------------------------------------------------
+    Airbnb Arm                              0.0602*       [-0.0057,0.1261]                                             
+    COVID-19 Arm                            0.0608*       [-0.0058,0.1274]                                             
+    Lost Job                                0.0824        [-0.0388,0.2037]               0.0822        [-0.0390,0.2033]
+    Airbnb Arm X Lost Job                  -0.1149        [-0.3074,0.0777]                                             
+    COVID-19 Arm X Lost Job                -0.0276        [-0.2210,0.1658]                                             
+    Female                                 -0.0987***    [-0.1533,-0.0440]              -0.0989***    [-0.1535,-0.0443]
+    25-44                                   0.0640        [-0.0158,0.1438]               0.0603        [-0.0189,0.1395]
+    45-64                                  -0.0092        [-0.1014,0.0830]              -0.0114        [-0.1033,0.0805]
+    65+                                    -0.2000***    [-0.3067,-0.0933]              -0.2030***    [-0.3094,-0.0966]
+    Hispanic                               -0.0099        [-0.1191,0.0993]              -0.0109        [-0.1200,0.0981]
+    black                                  -0.0202        [-0.1015,0.0611]              -0.0214        [-0.1026,0.0599]
+    other                                  -0.0554        [-0.1509,0.0401]              -0.0563        [-0.1517,0.0391]
+    $20,000-$74,999                        -0.0438        [-0.1146,0.0269]              -0.0441        [-0.1147,0.0265]
+    $75,000-$149,000                        0.0423        [-0.0420,0.1267]               0.0435        [-0.0408,0.1277]
+    $150,000+                               0.1080**       [0.0239,0.1920]               0.1089**       [0.0249,0.1928]
+    Any Treatments=1                                                                     0.0606**       [0.0036,0.1177]
+    Any Treatments=1 X Lost~b                                                           -0.0716        [-0.2321,0.0889]
+    Constant                                0.6635***      [0.5598,0.7673]               0.6663***      [0.5629,0.7697]
+    -------------------------------------------------------------------------------------------------------------------
+    Observations                              1211                                         1211                        
+    R-squared                               0.0903                                       0.0898                        
+    Adjusted R-squared                      0.0789                                       0.0799                        
+    F                                       7.9110                                       9.0824                        
+    -------------------------------------------------------------------------------------------------------------------
     95% confidence intervals in brackets
     * p<0.1, ** p<0.05, *** p<0.01
     

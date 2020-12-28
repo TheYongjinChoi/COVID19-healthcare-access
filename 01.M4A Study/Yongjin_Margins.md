@@ -3,9 +3,17 @@
 *Paper Authors: Ashley M Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke </br> Script Author: Yongjin Choi* </br> *Last updated: Dec. 13. 2020*
 
 * What's Included
-	- [Part I. Basic Setting](#part-i-basic-setting)
-	- [Part II. Data Prep](#part-ii-data-prep)
-	- [Part III. Analysis](#part-iii-Analysis)
+    * [Part I. Basic Setting](#part-i-basic-setting)
+	* [Part II. Data Prep](#part-ii-data-prep)
+	* [Part III. Analysis](#part-iii-Analysis)
+      - [Table 1](#table-1)
+      - [Table 2](#table-2)
+      - [Table 3](#table-3)
+      - [Table 4. Ashley's Original Version](#table-4-ashleys-original-version)
+      - [Table 4. OLS](#table-4.-ols)
+      - [Table 5. Ashley's Original Version](#table-5-ashleys-original-version)
+      - [Table 5. OLS](#table-5-ols)
+      - [Table 5. OLS with Party ID Interactions with Insurance and Job Losses](#table-5-ols-with-party-id-interactions-with-insurance-and-job-losses)
 
 ## Part I. Basic Setting
 
@@ -32,16 +40,23 @@ display "{hline}"
 set scheme s2color
 grstyle init
 grstyle color background white
+
+// Image Repository
+global myimg "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img"
+global esttab_opts nonumbers label interaction(" X ") compress star(* 0.1 ** 0.05 *** 0.01) //addnote("note")
 ```
 
     
     delimiter now cr
     
-    C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL
+    C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Fr
+    > aming Single-Payer\06.Submission\JHPPL
     
     
     
     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    
     
     
     
@@ -74,14 +89,30 @@ use "COVID_Survey Data_analysis_Qualtrics_sample_only", clear
 // Variables
 gen treatment = cond(COVID_arm_dummy == 1, 2, cond(Airbnb_arm_dummy == 1, 1, 0))
 tab treatment
-capture label var treatment "Treatment";
-capture label define treatment 0 "Control" 1 "Airbnb Arm" 2 "COVID-19 Arm";
-capture label values treatment treatment;
+capture label var treatment "Treatment"
+capture label define treatment 0 "Control" 1 "Airbnb Arm" 2 "COVID-19 Arm"
+capture label values treatment treatment
+
+capture label var any_treat "Any Treatments"
+
+gen pid_dem = Ideology_1==1 if !missing(Ideology_1)
+gen pid_gop = Ideology_1==4 if !missing(Ideology_1)
+gen pid_ind = Ideology_1==5 if !missing(Ideology_1)
+recode Ideology_1 (1=0 "Dem") (4=1 "Rep") (5 6=2 "Ind"), generate(pid)
 
 // Labeling
 label var COVID_arm_dummy "COVID-19 Study Arm (Arm 1)"
 label var Airbnb_arm_dummy "Airbnb Study Arm (Arm 2)"
 label var female "Female"
+label drop lost_insurance_dummy
+label var lost_insurance_dummy "Lost Insurance"
+capture label define lost_insurance_dummy 0 "Others" 1 "Lost Insurance"
+capture label values lost_insurance_dummy lost_insurance_dummy
+label drop lost_job
+label var lost_job "Lost Job"
+label var lost_job "Lost Insurance"
+capture label define lost_job 0 "Others" 1 "Lost Job"
+capture label values lost_job lost_job
 ```
 
     
@@ -95,6 +126,24 @@ label var female "Female"
               2 |        456       32.59      100.00
     ------------+-----------------------------------
           Total |      1,399      100.00
+    
+    
+    
+    
+    
+    (188 missing values generated)
+    
+    (188 missing values generated)
+    
+    (188 missing values generated)
+    
+    (1211 differences between Ideology_1 and pid)
+    
+    
+    
+    
+    
+    
     
     
     
@@ -170,7 +219,7 @@ sum HR01new_reverse_code, detail
     99%           10             10       Kurtosis       1.609382
     
 
-### Table 4
+### Table 4. Ashley's Original Version
 
 
 ```stata
@@ -203,8 +252,8 @@ qui marginsplot, ytitle("", margin(small)) xtitle("") title("(b) Airbnb arm (w/ 
                */xlab(-.25 " " 0 "Control" 1 "Treatment" 1.25 " ", notick)
 
 qui graph combine g2 g4, l1("Support for M4A (Probability)") ycommon xsize(8) ysize(5)
-graph save "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\STATA_Outputs\Table4.grh", replace
-graph export "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\STATA_Outputs\Table4.png", replace
+graph save "$myimg\Table4_original.grh", replace
+graph export "$myimg\Table4_original.png", replace
 
 
 esttab m1 m2 mfx2 m3 m4 mfx4 /*
@@ -308,51 +357,61 @@ esttab m1 m2 mfx2 m3 m4 mfx4 /*
     * p<0.1, ** p<0.05, *** p<0.01
     
 
-![](img/Table4.png)
+### Table 4. OLS
+
+![](img/Table4_OLS.png)
 
 
 ```stata
-/*----- Table 4 with multinomial logit -----*/
 eststo clear
-eststo m1: qui mlogit support_M4A_DK i.treatment
-eststo m2: qui mlogit support_M4A_DK i.treatment lost_insurance_dummy i.Party_ID female i.age_cat i.race_cat i.income_cat
-qui margins, at(treatment=(0 1 2)) vsquish
-qui marginsplot, ytitle("", margin(small)) xtitle("") title("(a) Treatment") name(g2_1, replace)/*
-               */plot(, label("Don't know" "Oppose" "Favor"))/*
-               */xsize(8) ysize(5)/*
-               */plot1opts(mcolor(gs10) lcolor(gs10) lpattern("--") msymbol(square))/*
-               */ci1opts(color(gs10))/*
-               */plot2opts(pstyle(p2) msymbol(square))/*
-               */plot3opts(pstyle(p1) msymbol(square))/*
-               */xlab(-.3 " " 0 "Control" 1 "Airbnb Arm" 2 "COVID-19 Arm" 2.3 " ", notick)
+local interaction pid lost_insurance_dummy lost_job
+local title0 "Effects of the Separate Treatments with Different Interactions"
+local title1 "(a) Interaction: Party ID"
+local title2 "(b) Interaction: Insurance Loss"
+local title3 "(c) Interaction: Job Loss"
 
-qui margins, at(lost_insurance_dummy=(0 1)) vsquish
-qui marginsplot, ytitle("", margin(small)) xtitle("") title("(b) Experienced or Heard" "Insurance Loss") name(g2_2, replace)/*
-               */plot(, label("Don't know" "Oppose" "Favor"))/*
-               */xsize(8) ysize(5)/*
-               */plot1opts(mcolor(gs10) lcolor(gs10) lpattern("--") msymbol(square))/*
-               */ci1opts(color(gs10))/*
-               */plot2opts(pstyle(p2) msymbol(square))/*
-               */plot3opts(pstyle(p1) msymbol(square))/*
-               */xlab(-.25 " " 0 "Control" 1 "Lost Insurance" 1.25 " ", notick)
+local coeflabels1 *._at#0.pid = "Dem" *._at#1.pid = "Rep" *._at#2.pid = "Ind"
+local coeflabels2 *._at#0.lost_insurance_dummy = "No" *._at#1.lost_insurance_dummy = "Yes"
+local coeflabels3 *._at#0.lost_job = "No" *._at#1.lost_job = "Yes"
 
-qui graph combine g2_1 g2_2, l1("Support for M4A (Probability)") ycommon xsize(8) ysize(5)
-graph save "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\STATA_Outputs\Table4_mlogit.grh", replace
-graph export "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\STATA_Outputs\Table4_mlogit.png", replace
 
-esttab /*
+local num = 1
+foreach x in `interaction' {
+    
+    eststo lm`num': qui reg support_M4A_dummy i.treatment##i.`x' female i.age_cat i.race_cat i.income_cat
+    eststo mfx`num': qui margins `x', at(treatment=(0(1)2)) vsquish post
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(1._at#*.`x'))/*
+             */(., keep(2._at#*.`x'))/*
+             */(., keep(3._at#*.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f)/*
+        */coeflabels(`coeflabels`num'', notick labgap(2)) plotregion(margin(b=0))/*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(2) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(1._at#*.`x' = `""{bf:No}" "{bf:Treatments}""' 2._at#*.`x' = `""{bf:Airbnb}" "{bf:Arm}""' 3._at#*.`x' = `""{bf:COVID-19}" "{bf:Arm}""')/*
+        */name(g`num', replace)
+    
+    local num = `num' + 1
+}
+
+qui graph combine g1 g2 g3, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Predicted Probability")/*
+    */ycommon xsize(9) ysize(5)
+graph save "$myimg\Table4_OLS.grh", replace
+graph export "$myimg\Table4_OLS.png", replace
+
+esttab lm1 mfx1 lm2 mfx2 lm3 mfx3/*
     //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
-    */,replace b(2) ci(3) r2(3) ar2(3) scalar(F) /*
-    */order(COVID_arm_dummy Airbnb_arm_dummy) /*
-    */title(Table 4. Multinomial Logit) /*
-    */nonumbers /*
-    */mtitles("No controls" "w/ controls)") /*
-    */addnote("Controls included but not shown (gender, race, income, party ID)") /*
-    */label /*
-    */nobaselevels /*
-    */interaction(" X ") /*
-    */varwidth(30) modelwidth(27) compress /*
-    */star(* 0.1 ** 0.05 *** 0.01)
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table 4. OLS Models))/*
+    */mgroups("Party ID" "Insurance Loss" "Job Loss", pattern(1 0 1 0 1 0))/*
+    */mtitles("Coefficients" "Margins" "Coefficients" "Margins" "Coefficients" "Margins")/*
+    */order(*.treatment *.pid *._at#*.pid *.lost_insurance_dummy *._at#*.lost_insurance_dummy *.lost_job *._at#*.lost_job)/*
+    */varwidth(20) modelwidth(15) /*
+    */$esttab_opts
 ```
 
     
@@ -364,182 +423,168 @@ esttab /*
     
     
     
-    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\STATA_Outputs\Table4_mlogit.grh saved)
-    
-    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\STATA_Outputs\Table4_mlogit.png written in PNG format)
     
     
-    Table 4. Multinomial Logit
-    --------------------------------------------------------------------------------------------
-                                                   No controls                   w/ controls)   
-    --------------------------------------------------------------------------------------------
-    Don_t_know                                                                                  
-    treatment=1                                          -0.43*                         -0.43   
-                                                [-0.916,0.056]                 [-0.948,0.093]   
     
-    treatment=2                                          -0.83***                       -0.90***
-                                               [-1.379,-0.284]                [-1.482,-0.321]   
     
-    RECODE of health_insurance_s~a                                                      -1.40***
-                                                                              [-2.001,-0.802]   
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table4_OLS.grh saved)
     
-    Republican                                                                           0.45   
-                                                                               [-0.132,1.035]   
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table4_OLS.png written in PNG format)
     
-    Independent                                                                          0.74***
-                                                                                [0.188,1.295]   
     
-    Female                                                                               1.34***
-                                                                                [0.749,1.921]   
+    Table 5. OLS Models, Any Treatment with Interactions (Party ID/Job and Insurance Loss)
+    --------------------------------------------------------------------------------------------------------------------------------------
+                                Party ID                        Insurance Loss                              Job Loss                      
+                            Coefficients            Margins       Coefficients            Margins       Coefficients            Margins   
+    --------------------------------------------------------------------------------------------------------------------------------------
+    Airbnb Arm                    0.0686                                0.0692                                0.0602*                     
+                         [-0.0252,0.1625]                       [-0.0151,0.1535]                       [-0.0057,0.1261]                      
     
-    25-44                                                                               -0.02   
-                                                                               [-0.696,0.646]   
+    COVID-19 Arm                  0.0960**                              0.0530                                0.0608*                     
+                         [0.0005,0.1914]                       [-0.0308,0.1368]                       [-0.0058,0.1274]                      
     
-    45-64                                                                               -0.25   
-                                                                               [-1.041,0.532]   
+    Rep                          -0.1198**                                                                                                
+                         [-0.2173,-0.0222]                                                                                                  
     
-    65+                                                                                  0.06   
-                                                                               [-0.831,0.959]   
+    Ind                          -0.1321**                                                                                                
+                         [-0.2404,-0.0239]                                                                                                  
     
-    Hispanic                                                                             0.16   
-                                                                               [-0.805,1.120]   
+    Airbnb Arm X Rep             -0.0544                                                                                                  
+                         [-0.1939,0.0851]                                                                                                  
     
-    black                                                                                0.54   
-                                                                               [-0.131,1.203]   
+    Airbnb Arm X Ind             -0.0139                                                                                                  
+                         [-0.1723,0.1446]                                                                                                  
     
-    other                                                                                0.44   
-                                                                               [-0.351,1.231]   
+    COVID-19 Arm X Rep           -0.0657                                                                                                  
+                         [-0.2061,0.0746]                                                                                                  
     
-    $20,000-$74,999                                                                      0.21   
-                                                                               [-0.312,0.726]   
+    COVID-19 Arm X Ind           -0.0705                                                                                                  
+                         [-0.2306,0.0896]                                                                                                  
     
-    $75,000-$149,000                                                                    -1.22** 
-                                                                              [-2.157,-0.285]   
+    1._at X Dem                                      0.7120***                                                                            
+                                            [0.6470,0.7770]                                                                               
     
-    $150,000+                                                                           -0.96** 
-                                                                              [-1.859,-0.064]   
+    1._at X Rep                                      0.5922***                                                                            
+                                            [0.5202,0.6643]                                                                               
     
-    Constant                                             -1.76***                       -2.42***
-                                               [-2.066,-1.454]                [-3.452,-1.392]   
-    --------------------------------------------------------------------------------------------
-    Oppose                                                                                      
-    treatment=1                                          -0.14                          -0.17   
-                                                [-0.459,0.186]                 [-0.515,0.170]   
+    1._at X Ind                                      0.5799***                                                                            
+                                            [0.4936,0.6661]                                                                               
     
-    treatment=2                                          -0.11                          -0.13   
-                                                [-0.433,0.210]                 [-0.473,0.211]   
+    2._at X Dem                                      0.7806***                                                                            
+                                            [0.7122,0.8491]                                                                               
     
-    RECODE of health_insurance_s~a                                                      -0.11   
-                                                                               [-0.427,0.204]   
+    2._at X Rep                                      0.6065***                                                                            
+                                            [0.5324,0.6807]                                                                               
     
-    Republican                                                                           0.94***
-                                                                                [0.600,1.274]   
+    2._at X Ind                                      0.6346***                                                                            
+                                            [0.5387,0.7306]                                                                               
     
-    Independent                                                                          0.74***
-                                                                                [0.353,1.117]   
+    3._at X Dem                                      0.8080***                                                                            
+                                            [0.7379,0.8781]                                                                               
     
-    Female                                                                               0.27*  
-                                                                               [-0.028,0.573]   
+    3._at X Rep                                      0.6225***                                                                            
+                                            [0.5482,0.6968]                                                                               
     
-    25-44                                                                               -0.42*  
-                                                                               [-0.841,0.005]   
+    3._at X Ind                                      0.6053***                                                                            
+                                            [0.5078,0.7028]                                                                               
     
-    45-64                                                                                0.09   
-                                                                               [-0.398,0.580]   
+    Lost Insurance                                                      0.0917**                                                          
+                                                               [0.0042,0.1792]                                                            
     
-    65+                                                                                  1.02***
-                                                                                [0.472,1.575]   
+    Airbnb Arm X Lost ~e                                               -0.0468                                                            
+                                                               [-0.1703,0.0767]                                                            
     
-    Hispanic                                                                             0.38   
-                                                                               [-0.211,0.966]   
+    COVID-19 Arm X Los~e                                                0.0158                                                            
+                                                               [-0.1095,0.1410]                                                            
     
-    black                                                                                0.35   
-                                                                               [-0.099,0.807]   
+    1._at X Others                                                                         0.5965***                                      
+                                                                                  [0.5369,0.6560]                                         
     
-    other                                                                                0.24   
-                                                                               [-0.265,0.750]   
+    1._at X Lost Insur~e                                                                   0.6882***                                      
+                                                                                  [0.6258,0.7505]                                         
     
-    $20,000-$74,999                                                                      0.26   
-                                                                               [-0.123,0.636]   
+    2._at X Others                                                                         0.6656***                                      
+                                                                                  [0.6043,0.7269]                                         
     
-    $75,000-$149,000                                                                     0.14   
-                                                                               [-0.318,0.596]   
+    2._at X Lost Insur~e                                                                   0.7106***                                      
+                                                                                  [0.6424,0.7788]                                         
     
-    $150,000+                                                                           -0.37   
-                                                                               [-0.854,0.119]   
+    3._at X Others                                                                         0.6494***                                      
+                                                                                  [0.5890,0.7099]                                         
     
-    Constant                                             -0.92***                       -1.64***
-                                               [-1.142,-0.702]                [-2.268,-1.002]   
-    --------------------------------------------------------------------------------------------
-    Favor                                                                                       
-    treatment=1                                           0.00                           0.00   
-                                                 [0.000,0.000]                  [0.000,0.000]   
+    3._at X Lost Insur~e                                                                   0.7569***                                      
+                                                                                  [0.6856,0.8282]                                         
     
-    treatment=2                                           0.00                           0.00   
-                                                 [0.000,0.000]                  [0.000,0.000]   
+    Lost Job                                                                                                  0.0824                      
+                                                                                                     [-0.0388,0.2037]                      
     
-    RECODE of health_insurance_s~a                                                       0.00   
-                                                                                [0.000,0.000]   
+    Airbnb Arm X Lost ~b                                                                                     -0.1149                      
+                                                                                                     [-0.3074,0.0777]                      
     
-    Republican                                                                           0.00   
-                                                                                [0.000,0.000]   
+    COVID-19 Arm X Los~b                                                                                     -0.0276                      
+                                                                                                     [-0.2210,0.1658]                      
     
-    Independent                                                                          0.00   
-                                                                                [0.000,0.000]   
+    1._at X Others                                                                                                               0.6285***
+                                                                                                                        [0.5827,0.6743]   
     
-    Female                                                                               0.00   
-                                                                                [0.000,0.000]   
+    1._at X Lost Job                                                                                                             0.7110***
+                                                                                                                        [0.5984,0.8235]   
     
-    25-44                                                                                0.00   
-                                                                                [0.000,0.000]   
+    2._at X Others                                                                                                               0.6887***
+                                                                                                                        [0.6415,0.7360]   
     
-    45-64                                                                                0.00   
-                                                                                [0.000,0.000]   
+    2._at X Lost Job                                                                                                             0.6563***
+                                                                                                                        [0.5134,0.7992]   
     
-    65+                                                                                  0.00   
-                                                                                [0.000,0.000]   
+    3._at X Others                                                                                                               0.6893***
+                                                                                                                        [0.6412,0.7374]   
     
-    Hispanic                                                                             0.00   
-                                                                                [0.000,0.000]   
+    3._at X Lost Job                                                                                                             0.7441***
+                                                                                                                        [0.5994,0.8889]   
     
-    black                                                                                0.00   
-                                                                                [0.000,0.000]   
+    Female                       -0.1057***                            -0.0844***                            -0.0987***                   
+                         [-0.1599,-0.0516]                       [-0.1399,-0.0290]                       [-0.1533,-0.0440]                      
     
-    other                                                                                0.00   
-                                                                                [0.000,0.000]   
+    25-44                         0.0462                                0.0615                                0.0640                      
+                         [-0.0320,0.1244]                       [-0.0174,0.1404]                       [-0.0158,0.1438]                      
     
-    $20,000-$74,999                                                                      0.00   
-                                                                                [0.000,0.000]   
+    45-64                        -0.0339                                0.0087                               -0.0092                      
+                         [-0.1243,0.0565]                       [-0.0843,0.1017]                       [-0.1014,0.0830]                      
     
-    $75,000-$149,000                                                                     0.00   
-                                                                                [0.000,0.000]   
+    65+                          -0.2235***                            -0.1779***                            -0.2000***                   
+                         [-0.3279,-0.1192]                       [-0.2858,-0.0701]                       [-0.3067,-0.0933]                      
     
-    $150,000+                                                                            0.00   
-                                                                                [0.000,0.000]   
+    Hispanic                     -0.0471                               -0.0084                               -0.0099                      
+                         [-0.1557,0.0615]                       [-0.1171,0.1004]                       [-0.1191,0.0993]                      
     
-    Constant                                              0.00                           0.00   
-                                                 [0.000,0.000]                  [0.000,0.000]   
-    --------------------------------------------------------------------------------------------
-    _                                                                                           
-    COVID-19 Study Arm (Arm 1)                                                                  
-                                                                                                
+    black                        -0.0651                               -0.0264                               -0.0202                      
+                         [-0.1466,0.0165]                       [-0.1075,0.0547]                       [-0.1015,0.0611]                      
     
-    Airbnb Study Arm (Arm 2)                                                                    
-                                                                                                
-    --------------------------------------------------------------------------------------------
-    Observations                                          1211                           1211   
-    R-squared                                                                                   
-    Adjusted R-squared                                                                          
-    F                                                                                           
-    --------------------------------------------------------------------------------------------
+    other                        -0.0433                               -0.0607                               -0.0554                      
+                         [-0.1383,0.0517]                       [-0.1561,0.0347]                       [-0.1509,0.0401]                      
+    
+    $20,000-$74,999              -0.0490                               -0.0458                               -0.0438                      
+                         [-0.1188,0.0207]                       [-0.1162,0.0246]                       [-0.1146,0.0269]                      
+    
+    $75,000-$149,000              0.0248                                0.0335                                0.0423                      
+                         [-0.0589,0.1085]                       [-0.0505,0.1175]                       [-0.0420,0.1267]                      
+    
+    $150,000+                     0.0928**                              0.0975**                              0.1080**                    
+                         [0.0093,0.1764]                       [0.0137,0.1814]                       [0.0239,0.1920]                      
+    
+    Constant                      0.7837***                             0.6251***                             0.6635***                   
+                         [0.6710,0.8965]                       [0.5123,0.7379]                       [0.5598,0.7673]                      
+    --------------------------------------------------------------------------------------------------------------------------------------
+    Observations                    1211               1211               1211               1211               1211               1211   
+    R-squared                     0.1159                                0.0954                                0.0903                      
+    Adjusted R-squared            0.1026                                0.0840                                0.0789                      
+    F                             8.6818                                8.3992                                7.9110                      
+    --------------------------------------------------------------------------------------------------------------------------------------
     95% confidence intervals in brackets
-    Controls included but not shown (gender, race, income, party ID)
     * p<0.1, ** p<0.05, *** p<0.01
     
 
-![](img/Table4_mlogit.png)
-
-### Table 5
+### Table 5. Ashley's Original Version
 
 
 ```stata
@@ -706,5 +751,772 @@ esttab /*
     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     95% confidence intervals in brackets
     Controls included but not shown (gender, race, income, party ID)
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+### Table 5. OLS
+
+![](img/Table5_OLS.png)
+
+
+```stata
+eststo clear
+local interaction pid lost_insurance_dummy lost_job
+local title0 "Effects of Any Treatments with Different Interactions"
+local title1 "(a) Interaction: Party ID"
+local title2 "(b) Interaction: Insurance Loss"
+local title3 "(c) Interaction: Job Loss"
+
+local coeflabels1 *._at#0.pid = "Dem" *._at#1.pid = "Rep" *._at#2.pid = "Ind"
+local coeflabels2 *._at#0.lost_insurance_dummy = "No" *._at#1.lost_insurance_dummy = "Yes"
+local coeflabels3 *._at#0.lost_job = "No" *._at#1.lost_job = "Yes"
+
+
+local num = 1
+foreach x in `interaction' {
+    
+    eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.`x' female i.age_cat i.race_cat i.income_cat
+    eststo mfx`num': qui margins `x', at(any_treat=(0 1)) vsquish post
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(1._at#*.`x'))/*
+             */(., keep(2._at#*.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f)/*
+        */coeflabels(`coeflabels`num'', notick labgap(2)) plotregion(margin(b=0))/*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(2) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(1._at#*.`x' = `""{bf:No}" "{bf:Treatments}""' 2._at#*.`x' = `"{bf:Treatments}"')/*
+        */name(g`num', replace)
+    
+    local num = `num' + 1
+}
+
+qui graph combine g1 g2 g3, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Predicted Probability")/*
+    */ycommon xsize(9) ysize(5)
+graph save "$myimg\Table5_OLS.gph", replace
+graph export "$myimg\Table5_OLS.png", replace
+
+esttab lm1 mfx1 lm2 mfx2 lm3 mfx3/*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table 5. OLS Models, Any Treatment with Interactions (Party ID/Job and Insurance Loss))/*
+    */mgroups("Party ID" "Insurance Loss" "Job Loss", pattern(1 0 1 0 1 0))/*
+    */mtitles("Coefficients" "Margins" "Coefficients" "Margins" "Coefficients" "Margins")/*
+    */order(*.any_treat *.pid *._at#*.pid *.lost_insurance_dummy *._at#*.lost_insurance_dummy *.lost_job *._at#*.lost_job)/*
+    */varwidth(20) modelwidth(15) /*
+    */$esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table5_OLS.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table5_OLS.png written in PNG format)
+    
+    
+    Table 5. OLS Models, Any Treatment with Interactions (Party ID/Job and Insurance Loss)
+    --------------------------------------------------------------------------------------------------------------------------------------
+                                Party ID                        Insurance Loss                              Job Loss                      
+                            Coefficients            Margins       Coefficients            Margins       Coefficients            Margins   
+    --------------------------------------------------------------------------------------------------------------------------------------
+    Any Treatments=1              0.0818**                              0.0610*                               0.0606**                    
+                         [0.0008,0.1628]                       [-0.0116,0.1336]                       [0.0036,0.1177]                      
+    
+    Rep                          -0.1200**                                                                                                
+                         [-0.2174,-0.0225]                                                                                                  
+    
+    Ind                          -0.1322**                                                                                                
+                         [-0.2403,-0.0240]                                                                                                  
+    
+    Any Treatments=1 X~p         -0.0596                                                                                                  
+                         [-0.1799,0.0606]                                                                                                  
+    
+    Any Treatments=1 X~d         -0.0416                                                                                                  
+                         [-0.1770,0.0938]                                                                                                  
+    
+    1._at X Dem                                      0.7122***                                                                            
+                                            [0.6472,0.7771]                                                                               
+    
+    1._at X Rep                                      0.5922***                                                                            
+                                            [0.5202,0.6642]                                                                               
+    
+    1._at X Ind                                      0.5800***                                                                            
+                                            [0.4938,0.6662]                                                                               
+    
+    2._at X Dem                                      0.7940***                                                                            
+                                            [0.7449,0.8431]                                                                               
+    
+    2._at X Rep                                      0.6144***                                                                            
+                                            [0.5614,0.6673]                                                                               
+    
+    2._at X Ind                                      0.6202***                                                                            
+                                            [0.5514,0.6890]                                                                               
+    
+    Lost Insurance                                                      0.0921**                                                          
+                                                               [0.0046,0.1796]                                                            
+    
+    Any Treatments=1 X~c                                               -0.0167                                                            
+                                                               [-0.1230,0.0896]                                                            
+    
+    1._at X Others                                                                         0.5963***                                      
+                                                                                  [0.5368,0.6559]                                         
+    
+    1._at X Lost Insur~e                                                                   0.6884***                                      
+                                                                                  [0.6261,0.7507]                                         
+    
+    2._at X Others                                                                         0.6573***                                      
+                                                                                  [0.6136,0.7010]                                         
+    
+    2._at X Lost Insur~e                                                                   0.7327***                                      
+                                                                                  [0.6826,0.7828]                                         
+    
+    Lost Job                                                                                                  0.0822                      
+                                                                                                     [-0.0390,0.2033]                      
+    
+    Any Treatments=1 X~b                                                                                     -0.0716                      
+                                                                                                     [-0.2321,0.0889]                      
+    
+    1._at X Others                                                                                                               0.6285***
+                                                                                                                        [0.5827,0.6742]   
+    
+    1._at X Lost Job                                                                                                             0.7106***
+                                                                                                                        [0.5981,0.8231]   
+    
+    2._at X Others                                                                                                               0.6891***
+                                                                                                                        [0.6553,0.7228]   
+    
+    2._at X Lost Job                                                                                                             0.6997***
+                                                                                                                        [0.5979,0.8014]   
+    
+    Female                       -0.1056***                            -0.0839***                            -0.0989***                   
+                         [-0.1596,-0.0515]                       [-0.1393,-0.0285]                       [-0.1535,-0.0443]                      
+    
+    25-44                         0.0458                                0.0627                                0.0603                      
+                         [-0.0323,0.1239]                       [-0.0162,0.1415]                       [-0.0189,0.1395]                      
+    
+    45-64                        -0.0331                                0.0096                               -0.0114                      
+                         [-0.1233,0.0571]                       [-0.0833,0.1025]                       [-0.1033,0.0805]                      
+    
+    65+                          -0.2232***                            -0.1761***                            -0.2030***                   
+                         [-0.3273,-0.1190]                       [-0.2838,-0.0684]                       [-0.3094,-0.0966]                      
+    
+    Hispanic                     -0.0481                               -0.0100                               -0.0109                      
+                         [-0.1565,0.0604]                       [-0.1186,0.0987]                       [-0.1200,0.0981]                      
+    
+    black                        -0.0656                               -0.0253                               -0.0214                      
+                         [-0.1470,0.0159]                       [-0.1063,0.0557]                       [-0.1026,0.0599]                      
+    
+    other                        -0.0432                               -0.0628                               -0.0563                      
+                         [-0.1380,0.0517]                       [-0.1581,0.0324]                       [-0.1517,0.0391]                      
+    
+    $20,000-$74,999              -0.0492                               -0.0461                               -0.0441                      
+                         [-0.1188,0.0205]                       [-0.1164,0.0243]                       [-0.1147,0.0265]                      
+    
+    $75,000-$149,000              0.0249                                0.0351                                0.0435                      
+                         [-0.0586,0.1085]                       [-0.0488,0.1190]                       [-0.0408,0.1277]                      
+    
+    $150,000+                     0.0943**                              0.0974**                              0.1089**                    
+                         [0.0109,0.1777]                       [0.0136,0.1812]                       [0.0249,0.1928]                      
+    
+    Constant                      0.7836***                             0.6236***                             0.6663***                   
+                         [0.6710,0.8962]                       [0.5109,0.7363]                       [0.5629,0.7697]                      
+    --------------------------------------------------------------------------------------------------------------------------------------
+    Observations                    1211               1211               1211               1211               1211               1211   
+    R-squared                     0.1155                                0.0946                                0.0898                      
+    Adjusted R-squared            0.1044                                0.0848                                0.0799                      
+    F                            10.4011                                9.6209                                9.0824                      
+    --------------------------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+### Table 5. OLS with Party ID Interactions with Insurance and Job Losses
+
+![](img/Table5_OLS_pidInteraction.png)
+
+
+```stata
+eststo clear
+local interaction lost_insurance_dummy lost_job
+local title0 "Effects of Any Treatments with Different Interactions"
+local title1 "(a) Interaction: Insurance Loss"
+local title2 "(b) Interaction: Job Loss"
+
+local coeflabels1 *._at#0.pid#*.lost_insurance_dummy = "Dem" *._at#1.pid#*.lost_insurance_dummy = "Rep" *._at#2.pid#*.lost_insurance_dummy = "Ind"
+local coeflabels2 *._at#0.pid#*.lost_job = "Dem" *._at#1.pid#*.lost_job = "Rep" *._at#2.pid#*.lost_job = "Ind"
+
+
+local num = 1
+foreach x in `interaction' {
+    
+    eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.pid##i.`x' female i.age_cat i.race_cat i.income_cat
+    eststo mfx`num': qui margins pid##`x', at(any_treat=(0 1)) vsquish post
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(1._at#*.pid#0.`x'))/*
+               */(., keep(2._at#*.pid#0.`x'))/*
+               */(., keep(2._at#*.pid#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f)/*
+        */coeflabels(`coeflabels`num'', notick labgap(2)) plotregion(margin(b=0))/*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(2) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(1._at#*.pid#*.`x' = `""{bf:No Treatments}" "{bf: No Interaction}""' 2._at#*.pid#0.`x' = `""{bf:Any Treatments}" "{bf: No Interaction}""' 2._at#*.pid#1.`x' = `""{bf:Any Treatments}" "{bf:w/ Interaction}""')/*
+        */name(g`num', replace)
+    
+    local num = `num' + 1
+}
+
+qui graph combine g1 g2, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Predicted Probability")/*
+    */ycommon xsize(9) ysize(4)
+graph save "$myimg\Table5_OLS_pidInteraction.gph", replace
+graph export "$myimg\Table5_OLS_pidInteraction.png", replace
+
+esttab lm1 mfx1 lm2 mfx2/*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table 5. OLS Models, Any Treatment with Party ID Interactions (Job and Insurance Loss))/*
+    */mgroups("Insurance Loss" "Job Loss", pattern(1 0 1 0))/*
+    */mtitles("Coefficients" "Margins" "Coefficients" "Margins")/*
+    */order("---|Individual Coefs|--" 1.any_treat 1.pid 2.pid 1.lost_insurance_dummy 1.lost_job /*
+    */"---|Interaction Coefs|--" *.any_treat#*.pid *.any_treat#1.lost_insurance_dummy *.any_treat#1.lost_job 1.pid#1.lost_insurance_dummy 1.pid#1.lost_job 2.pid#1.lost_insurance_dummy 2.pid#1.lost_job /*
+    */1.any_treat#*.pid#1.lost_insurance_dummy 1.any_treat#*.pid#1.lost_job /*
+    */"---|Margins at Treat=0|--" 1._at#*.pid 1._at#*.lost_insurance_dummy 1._at#*.lost_job 1._at#*.pid#*.lost_insurance_dummy /*
+    
+    */"---|Margins at Treat=1|--" 2._at 2._at#*.pid 2._at#*.lost_insurance_dummy 2._at#*.lost_job 2._at#*.pid#*.lost_insurance_dummy)/*
+    */varwidth(25) modelwidth(15)/*
+    */wide $esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table5_OLS_pidInteraction.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table5_OLS_pidInteraction.png written in PNG format)
+    
+    
+    Table 5. OLS Models, Any Treatment with Party ID Interactions (Job and Insurance Loss)
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                               Insurance Loss                                                              Job Loss                                                      
+                                 Coefficients                            Margins                       Coefficients                            Margins                   
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    ---|Individual Coefs|--                                                                                                                                              
+    Any Treatments=1                   0.1199**  [0.0044,0.2353]                                             0.1078**  [0.0215,0.1940]                                   
+    Rep                               -0.2178*** [-0.3579,-0.0778]                                            -0.1188**  [-0.2242,-0.0134]                                   
+    Ind                               -0.1004    [-0.2416,0.0408]                                            -0.0898    [-0.2061,0.0266]                                   
+    Lost Insurance                     0.0287    [-0.1014,0.1588]                                                                                                         
+    Lost Job                                                                                                 0.1671*   [-0.0180,0.3523]                                   
+    ---|Interaction Coefs|--                                                                                                                                             
+    Any Treatments=1 X Rep            -0.0923    [-0.2615,0.0768]                                            -0.0693    [-0.1983,0.0598]                                   
+    Any Treatments=1 X Ind            -0.1280    [-0.3035,0.0475]                                            -0.0973    [-0.2419,0.0473]                                   
+    Any Treatments=1 X Lost~c         -0.0867    [-0.2480,0.0746]                                                                                                         
+    Any Treatments=1 X Lost~b                                                                               -0.2064    [-0.4597,0.0469]                                   
+    Rep X Lost Insurance               0.1948**  [0.0029,0.3866]                                                                                                         
+    Rep X Lost Job                                                                                          -0.0307    [-0.3020,0.2406]                                   
+    Ind X Lost Insurance              -0.0857    [-0.3070,0.1357]                                                                                                         
+    Ind X Lost Job                                                                                          -0.2988*   [-0.6052,0.0076]                                   
+    Any Treatments=1 X Rep ~n          0.0898    [-0.1491,0.3288]                                                                                                         
+    Any Treatments=1 X Ind ~n          0.2240    [-0.0556,0.5036]                                                                                                         
+    Any Treatments=1 X Rep ~o                                                                                0.1024    [-0.2585,0.4632]                                   
+    Any Treatments=1 X Ind ~o                                                                                0.4480**  [0.0288,0.8672]                                   
+    ---|Margins at Treat=0|--                                                                                                                                            
+    1._at X Dem                                                           0.7111*** [0.6454,0.7768]                                             0.7091*** [0.6441,0.7741]
+    1._at X Rep                                                           0.5811*** [0.5093,0.6528]                                             0.5867*** [0.5143,0.6591]
+    1._at X Ind                                                           0.5721*** [0.4837,0.6605]                                             0.5845*** [0.4981,0.6708]
+    1._at X Others                                                        0.5978*** [0.5383,0.6573]                                                                      
+    1._at X Lost Insurance                                                0.6769*** [0.6149,0.7390]                                                                      
+    1._at X Dem X Others                                                  0.6982*** [0.6016,0.7947]                                                                      
+    1._at X Dem X Lost Insu~e                                             0.7268*** [0.6402,0.8135]                                                                      
+    1._at X Rep X Others                                                  0.4803*** [0.3784,0.5823]                                                                      
+    1._at X Rep X Lost Insu~e                                             0.7038*** [0.6024,0.8051]                                                                      
+    1._at X Ind X Others                                                  0.5978*** [0.4941,0.7014]                                                                      
+    1._at X Ind X Lost Insu~e                                             0.5408*** [0.3914,0.6902]                                                                      
+    1._at X Others                                                                                                                              0.6270*** [0.5818,0.6722]
+    1._at X Lost Job                                                                                                                            0.7163*** [0.6053,0.8274]
+    1._at X Dem X Others                                                                                                                        0.6896*** [0.6199,0.7593]
+    1._at X Dem X Lost Job                                                                                                                      0.8567*** [0.6843,1.0291]
+    1._at X Rep X Others                                                                                                                        0.5708*** [0.4925,0.6492]
+    1._at X Rep X Lost Job                                                                                                                      0.7073*** [0.5239,0.8906]
+    1._at X Ind X Others                                                                                                                        0.5998*** [0.5071,0.6925]
+    1._at X Ind X Lost Job                                                                                                                      0.4681*** [0.2405,0.6957]
+    ---|Margins at Treat=1|--                                                                                                                                            
+    2._at                                                                                                                                                                
+    2._at X Dem                                                           0.7918*** [0.7432,0.8405]                                             0.7928*** [0.7435,0.8421]
+    2._at X Rep                                                           0.6100*** [0.5575,0.6625]                                             0.6131*** [0.5601,0.6660]
+    2._at X Ind                                                           0.6258*** [0.5565,0.6952]                                             0.6231*** [0.5542,0.6921]
+    2._at X Others                                                        0.6560*** [0.6131,0.6989]                                                                      
+    2._at X Lost Insurance                                                0.7307*** [0.6813,0.7801]                                                                      
+    2._at X Dem X Others                                                  0.8180*** [0.7524,0.8836]                                                                      
+    2._at X Dem X Lost Insu~e                                             0.7600*** [0.6854,0.8345]                                                                      
+    2._at X Rep X Others                                                  0.5078*** [0.4352,0.5805]                                                                      
+    2._at X Rep X Lost Insu~e                                             0.7344*** [0.6571,0.8118]                                                                      
+    2._at X Ind X Others                                                  0.5896*** [0.5049,0.6744]                                                                      
+    2._at X Ind X Lost Insu~e                                             0.6699*** [0.5565,0.7834]                                                                      
+    2._at X Others                                                                                                                              0.6883*** [0.6550,0.7216]
+    2._at X Lost Job                                                                                                                            0.7080*** [0.6064,0.8096]
+    2._at X Dem X Others                                                                                                                        0.7974*** [0.7460,0.8488]
+    2._at X Dem X Lost Job                                                                                                                      0.7581*** [0.5921,0.9242]
+    2._at X Rep X Others                                                                                                                        0.6093*** [0.5529,0.6657]
+    2._at X Rep X Lost Job                                                                                                                      0.6417*** [0.4892,0.7942]
+    2._at X Ind X Others                                                                                                                        0.6103*** [0.5383,0.6824]
+    2._at X Ind X Lost Job                                                                                                                      0.7202*** [0.4996,0.9409]
+    Female                            -0.0908*** [-0.1454,-0.0361]                                            -0.1065*** [-0.1606,-0.0524]                                   
+    25-44                              0.0510    [-0.0267,0.1287]                                             0.0484    [-0.0303,0.1272]                                   
+    45-64                             -0.0034    [-0.0948,0.0880]                                            -0.0278    [-0.1188,0.0633]                                   
+    65+                               -0.1815*** [-0.2880,-0.0750]                                            -0.2149*** [-0.3205,-0.1093]                                   
+    Hispanic                          -0.0455    [-0.1529,0.0620]                                            -0.0513    [-0.1600,0.0573]                                   
+    black                             -0.0703*   [-0.1511,0.0105]                                            -0.0687*   [-0.1503,0.0129]                                   
+    other                             -0.0498    [-0.1442,0.0447]                                            -0.0419    [-0.1371,0.0534]                                   
+    $20,000-$74,999                   -0.0447    [-0.1138,0.0244]                                            -0.0453    [-0.1151,0.0245]                                   
+    $75,000-$149,000                   0.0289    [-0.0540,0.1119]                                             0.0295    [-0.0543,0.1134]                                   
+    $150,000+                          0.0874**  [0.0046,0.1702]                                             0.1006**  [0.0169,0.1842]                                   
+    Constant                           0.7484*** [0.6111,0.8856]                                             0.7549*** [0.6381,0.8717]                                   
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Observations                         1211                               1211                               1211                               1211                   
+    R-squared                          0.1367                                                                0.1209                                                      
+    Adjusted R-squared                 0.1215                                                                0.1053                                                      
+    F                                  8.9690                                                                7.7841                                                      
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+### Coefficient Plots
+
+#### Party ID Interaction
+
+* With Party ID: Separate Treatments
+  * The Airbnb and COVID arms increased the support by 7%p and 10%p in the Dem group. Only the COVID arm turned out to be significant in this group.
+  * Compared to the Dem group, Rep and Ind groups have lower support for M4A by -0.12%p and -0.13%p.
+  * The coefficients in the Rep and Ind groups are a little complicated. In the Rep group, the Airbnb and COVID arms increased the support respectively by 1.43%p (-0.1198 [Beta of No Arms in the Rep group] - 0.0544 [Beta of Airbnb arm in the Dem group] + 0.0686 [Beta of Airbnb arm in the Rep group]) 3.03%p (-0.1198 [Beta of No Arms in the Rep group] - 0.0657 [Beta of COVID arm in the Dem group] + 0.0960 [Beta of COVID arm in the Rep group]).
+  * In the same manner, in the Ind group, the Airbnb and COVID arms increased the support respectively by 5.47%p and 2.54%p.
+
+
+* With Party ID: Any Treatments
+  * any_treat increased the support by 8%p in the Dem group.
+  * But, any_treat increased the support by 2.22%p in the Rep group and 4.02%p, which are quite marginal.
+
+
+![](img\CoefPlot_PID_edited.png)
+
+
+```stata
+eststo clear
+local x pid
+local title0 "Effects of the Treatments on the Support for M4A: With the Party ID Interaction"
+local title1 "(a) Separate Treatments"
+local title2 "(b) Any Treatments"
+
+local coeflabels1 1.treatment = `""Airbnb" "Arm""' 2.treatment = `""COVID" "Arm""' 1.treatment#*.`x' = `""Airbnb" "Arm""' 2.treatment#*.`x' = `""COVID" "Arm""' 0.treatment = `""No" "Arms""' *.`x' = `""No" "Arms""'
+local coeflabels2 1.any_treat = `""Any" "Arms""' 1.any_treat#1.`x' = `""Any" "Arms""' 1.any_treat#2.`x' = `""Any" "Arms""' 0.any_treat = `""No" "Arms""' *.`x' = `""No" "Arms""'
+
+local num = 1
+eststo lm`num': qui reg support_M4A_dummy i.treatment##i.`x' female i.age_cat i.race_cat i.income_cat
+eststo mfx`num': qui margins `x', at(treatment=(0 1 2)) vsquish post
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.treatment))/*
+               */(., keep(1.`x' *.treatment#1.`x'))/*
+               */(., keep(2.`x' *.treatment#2.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels1', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.treatment = "{bf:Dem}" *.treatment#1.`x' 1.`x' = "{bf:Rep}" *.treatment#2.`x' 2.`x' = "{bf:Ind}")/*
+        */note(" " "* p<0.1, ** p<0.0.5, *** p<0.01") /*
+        */name(g`num', replace)
+    local num = `num' + 1
+
+eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.`x' female i.age_cat i.race_cat i.income_cat
+eststo mfx`num': qui margins `x', at(any_treat=(0 1)) vsquish post
+    //tab support_M4A_dummy any_treat, col
+    qui coefplot (., keep(*.any_treat))/*
+               */(., keep(1.`x' *.any_treat#1.`x'))/*
+               */(., keep(2.`x' *.any_treat#2.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) baselevels /*
+        */coeflabels(`coeflabels2', notick labgap(2)) plotregion(margin(b=0))/*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.any_treat = "{bf:Dem}" *.any_treat#1.`x' 1.`x' = "{bf:Rep}" *.any_treat#2.`x' 2.`x' = "{bf:Ind}")/*
+        */note(" " " ")/*
+        */name(g`num', replace)    
+    local num = `num' + 1
+
+qui graph combine g1 g2, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Point Estimates")/*
+    */ycommon xsize(11) ysize(5)
+graph save "$myimg\CoefPlot_PID.gph", replace
+graph export "$myimg\CoefPlot_PID.png", replace
+
+esttab lm1 mfx1 lm2 mfx2 /*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table. Effects of the Treatments on the Support for M4A: With the Party ID Interaction)/*
+    */mtitles("Separate" "Margins" "Any" "Margins")/*
+    */varwidth(25) modelwidth(20) nobaselevel /*
+    */wide $esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_PID.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_PID.png written in PNG format)
+    
+    
+    Table. Effects of the Treatments on the Support for M4A: With the Party ID Interaction
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                          Separate                                      Margins                                          Any                                      Margins                        
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Airbnb Arm                              0.0686        [-0.0252,0.1625]                                                                                                                                       
+    COVID-19 Arm                            0.0960**       [0.0005,0.1914]                                                                                                                                       
+    Rep                                    -0.1198**     [-0.2173,-0.0222]                                                           -0.1200**     [-0.2174,-0.0225]                                             
+    Ind                                    -0.1321**     [-0.2404,-0.0239]                                                           -0.1322**     [-0.2403,-0.0240]                                             
+    Airbnb Arm X Rep                       -0.0544        [-0.1939,0.0851]                                                                                                                                       
+    Airbnb Arm X Ind                       -0.0139        [-0.1723,0.1446]                                                                                                                                       
+    COVID-19 Arm X Rep                     -0.0657        [-0.2061,0.0746]                                                                                                                                       
+    COVID-19 Arm X Ind                     -0.0705        [-0.2306,0.0896]                                                                                                                                       
+    Female                                 -0.1057***    [-0.1599,-0.0516]                                                           -0.1056***    [-0.1596,-0.0515]                                             
+    25-44                                   0.0462        [-0.0320,0.1244]                                                            0.0458        [-0.0323,0.1239]                                             
+    45-64                                  -0.0339        [-0.1243,0.0565]                                                           -0.0331        [-0.1233,0.0571]                                             
+    65+                                    -0.2235***    [-0.3279,-0.1192]                                                           -0.2232***    [-0.3273,-0.1190]                                             
+    Hispanic                               -0.0471        [-0.1557,0.0615]                                                           -0.0481        [-0.1565,0.0604]                                             
+    black                                  -0.0651        [-0.1466,0.0165]                                                           -0.0656        [-0.1470,0.0159]                                             
+    other                                  -0.0433        [-0.1383,0.0517]                                                           -0.0432        [-0.1380,0.0517]                                             
+    $20,000-$74,999                        -0.0490        [-0.1188,0.0207]                                                           -0.0492        [-0.1188,0.0205]                                             
+    $75,000-$149,000                        0.0248        [-0.0589,0.1085]                                                            0.0249        [-0.0586,0.1085]                                             
+    $150,000+                               0.0928**       [0.0093,0.1764]                                                            0.0943**       [0.0109,0.1777]                                             
+    1._at X Dem                                                                          0.7120***      [0.6470,0.7770]                                                            0.7122***      [0.6472,0.7771]
+    1._at X Rep                                                                          0.5922***      [0.5202,0.6643]                                                            0.5922***      [0.5202,0.6642]
+    1._at X Ind                                                                          0.5799***      [0.4936,0.6661]                                                            0.5800***      [0.4938,0.6662]
+    2._at X Dem                                                                          0.7806***      [0.7122,0.8491]                                                            0.7940***      [0.7449,0.8431]
+    2._at X Rep                                                                          0.6065***      [0.5324,0.6807]                                                            0.6144***      [0.5614,0.6673]
+    2._at X Ind                                                                          0.6346***      [0.5387,0.7306]                                                            0.6202***      [0.5514,0.6890]
+    3._at X Dem                                                                          0.8080***      [0.7379,0.8781]                                                                                          
+    3._at X Rep                                                                          0.6225***      [0.5482,0.6968]                                                                                          
+    3._at X Ind                                                                          0.6053***      [0.5078,0.7028]                                                                                          
+    Any Treatments=1                                                                                                                  0.0818**       [0.0008,0.1628]                                             
+    Any Treatments=1 X Rep                                                                                                           -0.0596        [-0.1799,0.0606]                                             
+    Any Treatments=1 X Ind                                                                                                           -0.0416        [-0.1770,0.0938]                                             
+    Constant                                0.7837***      [0.6710,0.8965]                                                            0.7836***      [0.6710,0.8962]                                             
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Observations                              1211                                         1211                                         1211                                         1211                        
+    R-squared                               0.1159                                                                                    0.1155                                                                     
+    Adjusted R-squared                      0.1026                                                                                    0.1044                                                                     
+    F                                       8.6818                                                                                   10.4011                                                                     
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+#### Insurance Loss Interaction
+
+* Separate Treatments
+  * The two arms increased the support by 7%p and 5%p in the no insurance group, but they are not significant.
+  * The Insurance loss group shows a 9%p higher support when they are not exposed to the treatments.
+  * In the insurance loss group, the Airbnb and COVID arms further increased the support respectively by 2.24%p (0.0692 [Beta of Airbnb arm in the no insurance loss group]  – 0.0468 [beta of Airbnb arm arm in the insurance loss group]) and 6.87%p (0.0530 [Beta of COVID arm in the no insurance loss group] + 0.0158 [Beta of COVID arm in the no insurance loss group]).
+
+
+* Any Treatments
+  * any_treat increased the support by 6%p in the no insurance loss group. It is significant at the 90% CI (the spikes in the plots are based on 95% CI).
+  * any_treat increased the support by 4.43%p in the insurance loss group (approx. 0.06 – 0.02).
+
+
+![](img\CoefPlot_Insu_edited.png)
+
+
+```stata
+eststo clear
+local x lost_insurance_dummy
+local title0 "Effects of the Treatments on the Support for M4A: With the Insurance Loss Interaction"
+local title1 "(a) Separate Treatments"
+local title2 "(b) Any Treatments"
+
+local coeflabels1 1.treatment = `""Airbnb" "Arm""' 2.treatment = `""COVID-19" "Arm""' 1.treatment#*.`x' = `""Airbnb" "Arm""' 2.treatment#*.`x' = `""COVID-19" "Arm""' 1.`x' = `""No" "Arms""' 0.treatment = `""No" "Arms""'
+local coeflabels2 1.any_treat = `""Any" "Arms""' 1.any_treat#1.`x' = `""Any" "Arms""' 1.`x' = `""No" "Arms""' 0.any_treat = `""No" "Arms""'
+
+local num = 1
+eststo lm`num': qui reg support_M4A_dummy i.treatment##i.`x' female i.age_cat i.race_cat i.income_cat
+    eststo mfx`num': qui margins `x', at(treatment=(0 1 2)) vsquish post
+    qui coefplot (., keep(*.treatment))/*
+               */(., keep(1.`x' *.treatment#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels1', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor)) /*
+        */groups(*.treatment = "{bf:No Insurance Loss}" *.treatment#1.`x' 1.`x' = "{bf:Insurance Loss}")/*
+        */note(" " "* p<0.1, ** p<0.0.5, *** p<0.01") /*
+        */name(g`num', replace)
+    local num = `num' + 1
+
+eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.`x' female i.age_cat i.race_cat i.income_cat
+    eststo mfx`num': qui margins `x', at(any_treat=(0 1)) vsquish post
+    qui coefplot (., keep(*.any_treat))/*
+               */(., keep(1.`x' *.any_treat#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels2', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(2) mlabcolor(black)) ylab(, ang(hor)) /*
+        */groups(*.any_treat = "{bf:No Insurance Loss}" *.any_treat#1.`x' 1.`x' = "{bf:Insurance Loss}")/*
+        */note(" " " ") /*
+        */name(g`num', replace)    
+    local num = `num' + 1
+
+qui graph combine g1 g2, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Point Estimates")/*
+    */ycommon xsize(10) ysize(5)
+graph save "$myimg\CoefPlot_Insu.gph", replace
+graph export "$myimg\CoefPlot_Insu.png", replace
+
+esttab lm1 mfx1 lm2 mfx2/*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table. Effects of the Treatments on the Support for M4A: With the Insurance Loss Interaction)/*
+    */mtitles("Separate" "Margins" "Any" "Margins")/*
+    */varwidth(25) modelwidth(20) nobaselevel /*
+    */wide $esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Insu.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Insu.png written in PNG format)
+    
+    
+    Table. Effects of the Treatments on the Support for M4A: With the Insurance Loss Interaction
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                          Separate                                      Margins                                          Any                                      Margins                        
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Airbnb Arm                              0.0692        [-0.0151,0.1535]                                                                                                                                       
+    COVID-19 Arm                            0.0530        [-0.0308,0.1368]                                                                                                                                       
+    Lost Insurance                          0.0917**       [0.0042,0.1792]                                                            0.0921**       [0.0046,0.1796]                                             
+    Airbnb Arm X Lost Insur~e              -0.0468        [-0.1703,0.0767]                                                                                                                                       
+    COVID-19 Arm X Lost Ins~e               0.0158        [-0.1095,0.1410]                                                                                                                                       
+    Female                                 -0.0844***    [-0.1399,-0.0290]                                                           -0.0839***    [-0.1393,-0.0285]                                             
+    25-44                                   0.0615        [-0.0174,0.1404]                                                            0.0627        [-0.0162,0.1415]                                             
+    45-64                                   0.0087        [-0.0843,0.1017]                                                            0.0096        [-0.0833,0.1025]                                             
+    65+                                    -0.1779***    [-0.2858,-0.0701]                                                           -0.1761***    [-0.2838,-0.0684]                                             
+    Hispanic                               -0.0084        [-0.1171,0.1004]                                                           -0.0100        [-0.1186,0.0987]                                             
+    black                                  -0.0264        [-0.1075,0.0547]                                                           -0.0253        [-0.1063,0.0557]                                             
+    other                                  -0.0607        [-0.1561,0.0347]                                                           -0.0628        [-0.1581,0.0324]                                             
+    $20,000-$74,999                        -0.0458        [-0.1162,0.0246]                                                           -0.0461        [-0.1164,0.0243]                                             
+    $75,000-$149,000                        0.0335        [-0.0505,0.1175]                                                            0.0351        [-0.0488,0.1190]                                             
+    $150,000+                               0.0975**       [0.0137,0.1814]                                                            0.0974**       [0.0136,0.1812]                                             
+    1._at X Others                                                                       0.5965***      [0.5369,0.6560]                                                            0.5963***      [0.5368,0.6559]
+    1._at X Lost Insurance                                                               0.6882***      [0.6258,0.7505]                                                            0.6884***      [0.6261,0.7507]
+    2._at X Others                                                                       0.6656***      [0.6043,0.7269]                                                            0.6573***      [0.6136,0.7010]
+    2._at X Lost Insurance                                                               0.7106***      [0.6424,0.7788]                                                            0.7327***      [0.6826,0.7828]
+    3._at X Others                                                                       0.6494***      [0.5890,0.7099]                                                                                          
+    3._at X Lost Insurance                                                               0.7569***      [0.6856,0.8282]                                                                                          
+    Any Treatments=1                                                                                                                  0.0610*       [-0.0116,0.1336]                                             
+    Any Treatments=1 X Lost~c                                                                                                        -0.0167        [-0.1230,0.0896]                                             
+    Constant                                0.6251***      [0.5123,0.7379]                                                            0.6236***      [0.5109,0.7363]                                             
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Observations                              1211                                         1211                                         1211                                         1211                        
+    R-squared                               0.0954                                                                                    0.0946                                                                     
+    Adjusted R-squared                      0.0840                                                                                    0.0848                                                                     
+    F                                       8.3992                                                                                    9.6209                                                                     
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
+    * p<0.1, ** p<0.05, *** p<0.01
+    
+
+#### Job Loss Interaction
+
+* Separate Treatments
+  * The two arms increased the support by 6%p in the no job loss group. They are significant at the 90% CI.
+  * The job loss group shows a 8%p higher support when they are not exposed to the treatments. But, this is insignificant.
+  * In the job loss group, only the COVID arm further increased the support by 3.31%p (approx. 0.06 - 0.03). in this group, the Airbnb arm dropped the support by 5.47%p (approx. 0.06 – 0.11).
+
+
+* Any Treatments
+  * any_treat increased the support by 6%p in the no job loss group. It is significant at the 90% CI.
+  * The job loss group shows a 8%p higher support when they are not exposed to the treatments. But, this is insignificant.
+  * With the job loss interaction, any_treat has a very marginal effect, -1.09%p (approx. 0.06 – 0.07).
+
+
+![](img\CoefPlot_Job_edited.png)
+
+
+```stata
+eststo clear
+local x lost_job
+local title0 "Effects of the Treatments on the Support for M4A: With the Job Loss Interaction"
+local title1 "(a) Separate Treatments"
+local title2 "(b) Any Treatments"
+
+local coeflabels1 1.treatment = `""Airbnb" "Arm""' 2.treatment = `""COVID-19" "Arm""' 1.treatment#*.`x' = `""Airbnb" "Arm""' 2.treatment#*.`x' = `""COVID-19" "Arm""' 1.`x' = `""No" "Arms""' 0.treatment = `""No" "Arms""'
+local coeflabels2 1.any_treat = `""Any" "Arms""' 1.any_treat#1.`x' = `""Any" "Arms""' 1.`x' = `""No" "Arms""' 0.any_treat = `""No" "Arms""'
+
+local num = 1
+eststo lm`num': qui reg support_M4A_dummy i.treatment##i.`x' female i.age_cat i.race_cat i.income_cat
+    eststo mfx`num': qui margins `x', at(treatment=(0 1 2)) vsquish post
+    qui coefplot (., keep(*.treatment))/*
+               */(., keep(1.`x' *.treatment#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels1', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(4) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.treatment = "{bf:No Job Loss}" *.treatment#1.`x' 1.`x' = "{bf:Job Loss}")/*
+        */note(" " "* p<0.1, ** p<0.0.5, *** p<0.01") /*
+        */name(g`num', replace)
+    local num = `num' + 1
+
+eststo lm`num': qui reg support_M4A_dummy i.any_treat##i.`x' female i.age_cat i.race_cat i.income_cat
+    eststo mfx`num': qui margins `x', at(any_treat=(0 1)) vsquish post
+    qui coefplot (., keep(*.any_treat))/*
+               */(., keep(1.`x' *.any_treat#1.`x'))/*
+        */, title("`title`num''") xtitle("") ytitle("")/*
+        */vertical legend(rows(1)) recast(bar) barwidth(0.5) fcolor(*.5)/*
+        */citop ciopts(recast(rcap)) legend(off) format(%9.2f) /*
+        */coeflabels(`coeflabels2', notick labgap(2)) plotregion(margin(b=0)) baselevels /*
+        */addplot(scatter @b @at, ms(i) mlabel(@b) mlabpos(2) mlabcolor(black)) ylab(, ang(hor))/*
+        */groups(*.any_treat = "{bf:No Job Loss}" *.any_treat#1.`x' 1.`x' = "{bf:Job Loss}")/*
+        */note(" " " ") /*
+        */name(g`num', replace)    
+    local num = `num' + 1
+
+qui graph combine g1 g2, /*
+    */title("`title0'")/*
+    */b1("")/*
+    */l1("Point Estimates")/*
+    */ycommon xsize(10) ysize(5)
+
+graph save "$myimg\CoefPlot_Job.gph", replace
+graph export "$myimg\CoefPlot_Job.png", replace
+
+esttab lm1 mfx1 lm2 mfx2 /*
+    //using "C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2020_Media Consumption and Social Distancing\02.STATA Outputs\Appendix2.rtf"
+    */,replace b(4) ci(4) r2(4) ar2(4) scalar(F)/*
+    */title(Table. Effects of the Treatments on the Support for M4A: With the Job Loss Interaction)/*
+    */mtitles("Separate" "Margins" "Any" "Margins")/*
+    */varwidth(25) modelwidth(20) nobaselevel /*
+    */wide $esttab_opts
+```
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Job.gph saved)
+    
+    (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\CoefPlot_Job.png written in PNG format)
+    
+    
+    Table. Effects of the Treatments on the Support for M4A: With the Job Loss Interaction
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                          Separate                                      Margins                                          Any                                      Margins                        
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Airbnb Arm                              0.0602*       [-0.0057,0.1261]                                                                                                                                       
+    COVID-19 Arm                            0.0608*       [-0.0058,0.1274]                                                                                                                                       
+    Lost Job                                0.0824        [-0.0388,0.2037]                                                            0.0822        [-0.0390,0.2033]                                             
+    Airbnb Arm X Lost Job                  -0.1149        [-0.3074,0.0777]                                                                                                                                       
+    COVID-19 Arm X Lost Job                -0.0276        [-0.2210,0.1658]                                                                                                                                       
+    Female                                 -0.0987***    [-0.1533,-0.0440]                                                           -0.0989***    [-0.1535,-0.0443]                                             
+    25-44                                   0.0640        [-0.0158,0.1438]                                                            0.0603        [-0.0189,0.1395]                                             
+    45-64                                  -0.0092        [-0.1014,0.0830]                                                           -0.0114        [-0.1033,0.0805]                                             
+    65+                                    -0.2000***    [-0.3067,-0.0933]                                                           -0.2030***    [-0.3094,-0.0966]                                             
+    Hispanic                               -0.0099        [-0.1191,0.0993]                                                           -0.0109        [-0.1200,0.0981]                                             
+    black                                  -0.0202        [-0.1015,0.0611]                                                           -0.0214        [-0.1026,0.0599]                                             
+    other                                  -0.0554        [-0.1509,0.0401]                                                           -0.0563        [-0.1517,0.0391]                                             
+    $20,000-$74,999                        -0.0438        [-0.1146,0.0269]                                                           -0.0441        [-0.1147,0.0265]                                             
+    $75,000-$149,000                        0.0423        [-0.0420,0.1267]                                                            0.0435        [-0.0408,0.1277]                                             
+    $150,000+                               0.1080**       [0.0239,0.1920]                                                            0.1089**       [0.0249,0.1928]                                             
+    1._at X Others                                                                       0.6285***      [0.5827,0.6743]                                                            0.6285***      [0.5827,0.6742]
+    1._at X Lost Job                                                                     0.7110***      [0.5984,0.8235]                                                            0.7106***      [0.5981,0.8231]
+    2._at X Others                                                                       0.6887***      [0.6415,0.7360]                                                            0.6891***      [0.6553,0.7228]
+    2._at X Lost Job                                                                     0.6563***      [0.5134,0.7992]                                                            0.6997***      [0.5979,0.8014]
+    3._at X Others                                                                       0.6893***      [0.6412,0.7374]                                                                                          
+    3._at X Lost Job                                                                     0.7441***      [0.5994,0.8889]                                                                                          
+    Any Treatments=1                                                                                                                  0.0606**       [0.0036,0.1177]                                             
+    Any Treatments=1 X Lost~b                                                                                                        -0.0716        [-0.2321,0.0889]                                             
+    Constant                                0.6635***      [0.5598,0.7673]                                                            0.6663***      [0.5629,0.7697]                                             
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Observations                              1211                                         1211                                         1211                                         1211                        
+    R-squared                               0.0903                                                                                    0.0898                                                                     
+    Adjusted R-squared                      0.0789                                                                                    0.0799                                                                     
+    F                                       7.9110                                                                                    9.0824                                                                     
+    -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    95% confidence intervals in brackets
     * p<0.1, ** p<0.05, *** p<0.01
     
