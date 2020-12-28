@@ -4,8 +4,8 @@
 
 * What's Included
     * [Part I. Basic Setting](#part-i-basic-setting)
-	* [Part II. Data Prep](#part-ii-data-prep)
-	* [Part III. Analysis](#part-iii-Analysis)
+    * [Part II. Data Prep](#part-ii-data-prep)
+    * [Part III. Analysis](#part-iii-Analysis)
       - [Table 1](#table-1)
       - [Table 2](#table-2)
       - [Table 3](#table-3)
@@ -14,6 +14,11 @@
       - [Table 5. Ashley's Original Version](#table-5-ashleys-original-version)
       - [Table 5. OLS](#table-5-ols)
       - [Table 5. OLS with Party ID Interactions with Insurance and Job Losses](#table-5-ols-with-party-id-interactions-with-insurance-and-job-losses)
+      - [Coefficient Plots](#coefficient-plots)
+	- [Party ID Interaction](#party-id-interaction)
+	- [Insurance Loss Interaction](#insurance-loss-interaction)
+	- [Job Loss Interaction](#job-loss-interaction)
+
 
 ## Part I. Basic Setting
 
@@ -1122,7 +1127,7 @@ esttab lm1 mfx1 lm2 mfx2/*
   * But, any_treat increased the support by 2.22%p in the Rep group and 4.02%p, which are quite marginal.
 
 
-![](img\CoefPlot_PID_edited.png)
+![](img/CoefPlot_PID_edited.png)
 
 
 ```stata
@@ -1266,7 +1271,7 @@ esttab lm1 mfx1 lm2 mfx2 /*
   * any_treat increased the support by 4.43%p in the insurance loss group (approx. 0.06 – 0.02).
 
 
-![](img\CoefPlot_Insu_edited.png)
+![](img/CoefPlot_Insu_edited.png)
 
 
 ```stata
@@ -1400,7 +1405,7 @@ esttab lm1 mfx1 lm2 mfx2/*
   * With the job loss interaction, any_treat has a very marginal effect, -1.09%p (approx. 0.06 – 0.07).
 
 
-![](img\CoefPlot_Job_edited.png)
+![](img/CoefPlot_Job_edited.png)
 
 
 ```stata
