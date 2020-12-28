@@ -1,6 +1,6 @@
 # How is COVID-19 Associated Job-loss affecting Support for Medicare for All?
 
-*Paper Authors: Ashley M Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke </br> Script Author: Yongjin Choi* </br> *Last updated: Dec. 13. 2020*
+*Paper Authors: Ashley M Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke </br> Script Author: Yongjin Choi* </br> *Last updated: Dec. 20. 2020*
 
 * What's Included
     * [Part I. Basic Setting](#part-i-basic-setting)
@@ -10,7 +10,7 @@
       - [Table 2](#table-2)
       - [Table 3](#table-3)
       - [Table 4. Ashley's Original Version](#table-4-ashleys-original-version)
-      - [Table 4. OLS](#table-4.-ols)
+      - [Table 4. OLS](#table-4-ols)
       - [Table 5. Ashley's Original Version](#table-5-ashleys-original-version)
       - [Table 5. OLS](#table-5-ols)
       - [Table 5. OLS with Party ID Interactions with Insurance and Job Losses](#table-5-ols-with-party-id-interactions-with-insurance-and-job-losses)
@@ -432,7 +432,7 @@ esttab lm1 mfx1 lm2 mfx2 lm3 mfx3/*
     (file C:\Users\NoMoreTicket\OneDrive - University at Albany - SUNY\05.Research\2019_Framing Single-Payer\06.Submission\JHPPL\img\Table4_OLS.png written in PNG format)
     
     
-    Table 5. OLS Models, Any Treatment with Interactions (Party ID/Job and Insurance Loss)
+    Table 4. OLS Models with Separate Treatments
     --------------------------------------------------------------------------------------------------------------------------------------
                                 Party ID                        Insurance Loss                              Job Loss                      
                             Coefficients            Margins       Coefficients            Margins       Coefficients            Margins   
