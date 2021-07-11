@@ -1,6 +1,6 @@
-# COVID-19 Survey, June 2020
+# Health insurance loss during COVID-19 increases support for Universal Health Coverage
 
-This is a repository of the COVID-19 Survey conducted in June 2020. The following is the information of the survey.
+This repository provides the data and code that supports the findings of a study "Health insurance loss during COVID-19 increases support for Universal Health Coverage" published at Journal of Health Politics, Policy and Law (JHPPL). The study is based on a survey on health care access during the COVID-19 pandemic conducted in June 2020.
 
 * Time Period: Jun. 3. 2020 - Jun. 8. 2020
 * Sample Information
@@ -10,7 +10,7 @@ This is a repository of the COVID-19 Survey conducted in June 2020. The followin
 * Method: Qualtrics Online survey.
 
 
-## File Descriptions
+## What's Included
 
 ### Data
 
@@ -23,8 +23,20 @@ This is a repository of the COVID-19 Survey conducted in June 2020. The followin
 	* Contributors: Ashley M. Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke
 * **02. Media Polarization**: Effects of Media Consumption on Individual Attitudes to COVID-19 Issues
 	* Contributors: Yongjin Choi and Ashley M. Fox
+
+
+## Contact Us
+
+If you have questions regarding the data or the studies presented on this page, please contact at:
+
+[afox3@albany.edu](afox3@albany.edu) or [ychoi2@albany.edu](ychoi2@albany.edu)
 	
 ## Contributors
 
-Principal Investigator: [Ashley Fox](https://twitter.com/ashfoxly)
+Principal Investigator: [@Ashley Fox](https://twitter.com/ashfoxly)
+
+[@Heather Lanthorn](https://twitter.com/hlanthorn)
+
+[@Kevin Croke](https://twitter.com/jkcroke1)
+
 [@Yongjin Choi](https://twitter.com/TheYongjinChoi)
