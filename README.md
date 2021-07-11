@@ -27,5 +27,4 @@ This is a repository of the COVID-19 Survey conducted in June 2020. The followin
 ## Contributors
 
 Principal Investigator: [Ashley Fox](https://twitter.com/ashfoxly)
-
-Author: [@Yongjin Choi](https://twitter.com/TheYongjinChoi)
+[@Yongjin Choi](https://twitter.com/TheYongjinChoi)
