@@ -3,9 +3,9 @@
 *Paper Authors: Ashley M. Fox, Yongjin Choi, Heather Lanthorn, and Kevin Croke </br>
 
 * What's Included
-    * [Part I. Basic Setting](part-i-basic-setting)
-	* [Part II. Data Prep](part-ii-data-prep)
-	* [Part III. Main Results](part-iii-main-results)
+    * [Part I. Basic Setting](#part-i-basic-setting)
+	* [Part II. Data Prep](#part-ii-data-prep)
+	* [Part III. Main Results](#part-iii-main-results)
       - Figure 1
       - Table 1
       - Table 2
@@ -20,11 +20,11 @@
       - Table 7
         - Table 7A
         - Table 7B
-	* [Part IV. Brief Statements](part-iv-brief-statements)
+	* [Part IV. Brief Statements](#part-iv-brief-statements)
       - On page 14, "In the six months prior to our survey, 22% of respondents lost health insurance. ..."
       - On page 14, "24.74% of our under-65 sample reported being unemployed..."
       - On Page 16, "We cannot reject the null hypothesis that the two treatment treatments arms are equivalent (p=0.68)..."
-    * [Part V. Appendix Tables](part-v-appendix)
+    * [Part V. Appendix Tables](#part-v-appendix)
       - Table A1
       - Table A2
       - Table A3
