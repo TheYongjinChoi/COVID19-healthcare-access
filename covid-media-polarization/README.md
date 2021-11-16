@@ -1,8 +1,8 @@
 # Media Consumption and Social Distancing
 
-*Paper Authors: Yongjin Choi and Ashley M. Fox </br>
-*Choi, Yongjin and A. M. Fox. Does media slant polarize compliance with science-based public health recommendations? Effects of media consumption patterns on COVID-19 attitudes and behaviors in the United States. _forthcoming in Journal of Health Psychology_.
-*Last updated: Dec. 9. 2020*
+* Paper Authors: Yongjin Choi and Ashley M. Fox </br>
+* Citation: Choi, Yongjin and A. M. Fox. Does media slant polarize compliance with science-based public health recommendations? Effects of media consumption patterns on COVID-19 attitudes and behaviors in the United States. _forthcoming in Journal of Health Psychology_. </br>
+* Last updated: Dec. 9. 2020*
 
 * What's Included
 	- [Part I. Basic Setting](#part-i-basic-setting)
