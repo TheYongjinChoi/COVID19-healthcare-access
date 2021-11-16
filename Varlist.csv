@@ -11,7 +11,7 @@ ARM,Type of Treatment
 CONSENT,Consent Question
 COMPREHENSION1_ARM1,"According to the article, why did Sean McGuire lose his job?"
 COMPREHENSION2_ARM1,"According to the article, why did Sean lose his health insurance?"
-COMPREHENSION1_ARM2,"The following questions are about the article you just read.  According to the article, why did Sean McGuire lose his job?"
+COMPREHENSION2_ARM2,"The following questions are about the article you just read.  According to the article, why did Sean McGuire lose his job?"
 COMPREHENSION2_ARM2,Why did Sean lose his health insurance?
 HR1,Health Care Reform Attitudes
 HR1_10SCALE,"On a scale of 1-10 where 1 means you agree completely with statement A and a 10 means you agree completely with statement B, which of the following statements do you agree with more:
