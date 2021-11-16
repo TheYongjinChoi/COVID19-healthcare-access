@@ -7,8 +7,7 @@
 * What's Included
 	- [Part I. Basic Setting](#part-i-basic-setting)
 	- [Part II. Data Prep](#part-ii-data-prep)
-	- [Part III. Data Review](#part-iii-data-review)
-    	- [Part IV. Analysis](#part-iv-Analysis)
+	- [Part III. Analysis](#part-iii-Analysis)
 
 ## Part I. Basic Setting
 
@@ -291,11 +290,7 @@ save "COVID19Survey_20200613", replace;
 use "COVID19Survey_20200613", clear;
 ```
 
-## Part III. Data Exploration
-
-* This part is not included in the Github version. See the html version for more details of this part.
-
-## Part IV. Analysis
+## Part III. Analysis
 
 ### Social Distancing and Face Covering
 
